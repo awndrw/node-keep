@@ -1,17 +1,27 @@
 import crypto from 'crypto';
 
-// INTERNAL DECLARATIONS
-export type DatumKey = crypto.BinaryLike;
+/**
+ * The key of a datum stored in Keep (not hashed).
+ * @internal
+ */
+export type DatumKey = string;
+
+/**
+ * The value type of a datum stored in Keep.
+ * @internal
+ */
 export type DatumValue = any;
 
 export const createDefaultConfig = (subdir = 'storage'): Config => ({
 	dir: `.keep/${subdir}`,
 	log: console.log,
-	throw: false,
 });
 
-export const isDatum = (value: any): value is Datum =>
-	value && value.key && value.value;
+/**
+ * Returns true if the given value is a valid {@link Datum | datum}.
+ */
+export const isDatum = (datum: any): datum is Datum =>
+	datum && datum.key && datum.value;
 
 export function isError<T extends new (...args: any) => Error>(
 	value: Error,
@@ -19,31 +29,39 @@ export function isError<T extends new (...args: any) => Error>(
 ): value is InstanceType<T> & NodeJS.ErrnoException {
 	return value instanceof errorType;
 }
-
+/**
+ * Returns the hash of the given key used to store the datum in Keep.
+ * @internal
+ */
 export const hash = (key: DatumKey) =>
 	crypto.createHash('sha256').update(key).digest('hex');
 
-// PUBLIC DECLARATIONS
+/**
+ * The configuration for Keep storage.
+ *
+ * @privateRemarks
+ * See {@link createDefaultConfig} for the default configuration.
+ *
+ * @public
+ */
 export interface Config {
 	/**
 	 * The directory to store the data in.
-	 * @default ".keep/storage"
+	 * @defaultValue ".keep/storage"
 	 */
 	dir: string;
 
 	/**
-	 * Whether or not to throw errors instead of logging them.
-	 * @default false
-	 */
-	throw: boolean;
-
-	/**
 	 * A function to log errors to (or false to disable).
-	 * @default console.log
+	 * @defaultValue console.log
 	 */
 	log: ((...args: any[]) => void) | false;
 }
 
+/**
+ * The data type stored in Keep.
+ * @public
+ */
 export interface Datum {
 	key: DatumKey;
 	value: DatumValue;

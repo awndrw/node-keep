@@ -6,8 +6,13 @@ jest.mock('fs/promises');
 import { Keep } from '..';
 
 describe('Keep', () => {
-	const testDir = '/.keep/storage';
+	const testDir = '.keep/storage';
 	let keep: Keep;
+
+	const testData = {
+		key1: 'value1',
+		key2: 'value2',
+	};
 
 	beforeEach(() => {
 		vol.reset();
@@ -27,26 +32,62 @@ describe('Keep', () => {
 		});
 	});
 
-	describe('data', () => {
+	describe('methods', () => {
 		beforeEach(async () => {
 			await keep.init();
 		});
 
-		it('should return an empty object if the storage directory is empty', async () => {
-			const data = await keep.data();
-			expect(data).toEqual({});
+		describe('data', () => {
+			it('should return an empty object if the storage directory is empty', async () => {
+				const data = await keep.data();
+				expect(data).toEqual({});
+			});
+
+			it('should return an object with the data from the storage directory', async () => {
+				Object.entries(testData).forEach(async ([key, value]) => {
+					await keep.setItem(key, value);
+				});
+				const dataFromKeep = await keep.data();
+				expect(dataFromKeep).toEqual(testData);
+			});
 		});
 
-		it('should return an object with the data from the storage directory', async () => {
-			const data = {
-				key1: 'value1',
-				key2: 'value2',
-			};
-			Object.entries(data).forEach(async ([key, value]) => {
-				await keep.setItem(key, value);
+		describe('keys', () => {
+			it('should return an empty array if the storage directory is empty', async () => {
+				const data = await keep.keys();
+				expect(data).toEqual([]);
 			});
-			const dataFromKeep = await keep.data();
-			expect(dataFromKeep).toEqual(data);
+
+			it('should return an array with the keys from the storage directory', async () => {
+				Object.entries(testData).forEach(async ([key, value]) => {
+					await keep.setItem(key, value);
+				});
+				const dataFromKeep = await keep.keys();
+				expect(dataFromKeep).toEqual(Object.keys(testData));
+			});
 		});
+
+		describe('values', () => {
+			it('should return an empty array if the storage directory is empty', async () => {
+				const data = await keep.keys();
+				expect(data).toEqual([]);
+			});
+
+			it('should return an array with the keys from the storage directory', async () => {
+				Object.entries(testData).forEach(async ([key, value]) => {
+					await keep.setItem(key, value);
+				});
+				const dataFromKeep = await keep.keys();
+				expect(dataFromKeep).toEqual(Object.keys(testData));
+			});
+		});
+
+		// TODO: set item
+
+		// TODO: get item
+
+		// TODO: remove item
+
+		// TODO: clear
 	});
 });

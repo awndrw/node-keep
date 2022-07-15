@@ -18,6 +18,10 @@ export class Keep {
 			: nodePath.resolve(process.cwd(), dir);
 	}
 
+	/**
+	 * Initializes the storage directory.
+	 * @public
+	 */
 	public async init() {
 		try {
 			await fs.mkdir(this.storageDir, { recursive: true });
@@ -26,6 +30,10 @@ export class Keep {
 		}
 	}
 
+	/**
+	 * Returns the data stored in the storage directory.
+	 * @public
+	 */
 	public async data(): Promise<Record<string, DatumValue>> {
 		const data = (await this.readDir()) ?? [];
 		return data.reduce((res, datum) => {
@@ -34,32 +42,59 @@ export class Keep {
 		}, {} as Record<string, DatumValue>);
 	}
 
+	/**
+	 * Returns the keys of the data stored in the storage directory.
+	 * @public
+	 */
 	public async keys(): Promise<string[]> {
 		const data = await this.data();
 		return Object.keys(data);
 	}
 
+	/**
+	 * Returns the values of the data stored in the storage directory.
+	 * @public
+	 */
 	public async values(): Promise<DatumValue[]> {
 		const data = await this.data();
 		return Object.values(data);
 	}
 
+	/**
+	 * Stores (or updates) a key-value pair in the storage directory.
+	 * @returns An empty promise
+	 * @public
+	 */
 	public setItem(key: DatumKey, value: DatumValue) {
 		const filePath = this.getDatumPath(key);
 		const datum: Datum = { key, value };
 		return this.writeFile(filePath, datum);
 	}
 
+	/**
+	 * Retrieves the value of the specified key or undefined if the key is not found.
+	 * @returns The value of the datum or undefined
+	 * @public
+	 */
 	public getItem(key: DatumKey) {
 		const filePath = this.getDatumPath(key);
 		return this.readFile(filePath);
 	}
 
+	/**
+	 * Removes a key-value pair from the storage directory.
+	 * @returns An empty promise
+	 * @public
+	 */
 	public removeItem(key: DatumKey) {
 		const filePath = this.getDatumPath(key);
 		return this.removeFile(filePath);
 	}
 
+	/**
+	 * Removes all key-value pairs from the storage directory.
+	 * @public
+	 */
 	public async clear() {
 		const keys = (await this.keys()) ?? [];
 		for (const key of keys) {
@@ -126,6 +161,9 @@ export class Keep {
 		return nodePath.join(this.storageDir, hash(key));
 	}
 
+	/**
+	 * Logs the provided data if logging is enabled.
+	 */
 	private log(...args: any[]) {
 		if (this.config.log) {
 			this.config.log(...args);
@@ -134,23 +172,23 @@ export class Keep {
 
 	/**
 	 * Logs and throws the error if the config allows it.
-	 * @param err Any error object
+	 * @param err - Any error object
+	 * @internal
 	 */
 	private throw(err: any) {
 		const error = err instanceof Error ? err : new Error(err);
 		if (this.config.log) {
 			this.config.log(error);
 		}
-		if (this.config.throw) {
-			throw error;
-		}
+		throw error;
 	}
 
 	/**
 	 * Returns true if the error has the given code.
-	 * @param err Any error object
-	 * @param code A code to match against the error
+	 * @param err - Any error object
+	 * @param code - A code to match against the error
 	 * @returns true if the error matches the code
+	 * @internal
 	 */
 	private catch(err: any, code: string) {
 		if (!isError(err, Error)) {

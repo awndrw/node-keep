@@ -2,7 +2,7 @@ module.exports = {
 	$schema: 'http://json.schemastore.org/eslintrc',
 	root: true,
 	parser: '@typescript-eslint/parser',
-	plugins: ['@typescript-eslint', 'prettier'],
+	plugins: ['@typescript-eslint', 'eslint-plugin-tsdoc', 'prettier'],
 	extends: [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/eslint-recommended',
@@ -25,6 +25,7 @@ module.exports = {
 		],
 		'@typescript-eslint/no-explicit-any': 'off',
 		'@typescript-eslint/consistent-type-imports': ['error'],
+		'tsdoc/syntax': 'warn',
 		'prettier/prettier': 'error',
 	},
 	overrides: [
