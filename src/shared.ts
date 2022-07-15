@@ -12,6 +12,15 @@ export type DatumKey = string;
  */
 export type DatumValue = any;
 
+/**
+ * The data type stored in Keep.
+ * @internal
+ */
+export interface Datum {
+	key: DatumKey;
+	value: DatumValue;
+}
+
 export const createDefaultConfig = (subdir = 'storage'): Config => ({
 	dir: `.keep/${subdir}`,
 	log: console.log,
@@ -19,10 +28,14 @@ export const createDefaultConfig = (subdir = 'storage'): Config => ({
 
 /**
  * Returns true if the given value is a valid {@link Datum | datum}.
+ * @internal
  */
 export const isDatum = (datum: any): datum is Datum =>
 	datum && datum.key && datum.value;
 
+/**
+ * @internal
+ */
 export function isError<T extends new (...args: any) => Error>(
 	value: Error,
 	errorType: T
@@ -56,13 +69,4 @@ export interface Config {
 	 * @defaultValue console.log
 	 */
 	log: ((...args: any[]) => void) | false;
-}
-
-/**
- * The data type stored in Keep.
- * @public
- */
-export interface Datum {
-	key: DatumKey;
-	value: DatumValue;
 }

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import nodePath from 'path';
-import type { Config, DatumKey, DatumValue, Datum } from './base';
-import { createDefaultConfig, isDatum, hash, isError } from './base';
+import type { Config, DatumKey, DatumValue, Datum } from './shared';
+import { createDefaultConfig, isDatum, hash, isError } from './shared';
 
 const DEFAULT_CONFIG: Config = createDefaultConfig();
 
