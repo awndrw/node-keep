@@ -23,7 +23,9 @@
 		"strictPropertyInitialization": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"noImplicitOverride": true
+		"noImplicitOverride": true,
+		"allowJs": true,
+		"checkJs": true
 	},
 	"include": ["src"]
 }

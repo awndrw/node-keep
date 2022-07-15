@@ -1,7 +1,7 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import nodePath from 'path';
 import type { Config, DatumKey, DatumValue, Datum } from './base';
-import { createDefaultConfig, isDatum, hash } from './base';
+import { createDefaultConfig, isDatum, hash, isError } from './base';
 
 const DEFAULT_CONFIG: Config = createDefaultConfig();
 
@@ -13,17 +13,17 @@ export class Keep {
 		this.config = { ...DEFAULT_CONFIG, ...config };
 
 		const { dir } = this.config;
-		const resolvedDir = nodePath.isAbsolute(dir)
+		this.storageDir = nodePath.isAbsolute(dir)
 			? dir
 			: nodePath.resolve(process.cwd(), dir);
-		if (!fs.existsSync(resolvedDir)) {
-			try {
-				fs.mkdirSync(resolvedDir, { recursive: true });
-			} catch (err) {
-				throw new Error(`Could not create storage directory: ${err}`);
-			}
+	}
+
+	public async init() {
+		try {
+			await fs.mkdir(this.storageDir, { recursive: true });
+		} catch (err) {
+			throw new Error(`Could not create storage directory: ${err}`);
 		}
-		this.storageDir = resolvedDir;
 	}
 
 	public async data(): Promise<Record<string, DatumValue>> {
@@ -31,7 +31,7 @@ export class Keep {
 		return data.reduce((res, datum) => {
 			res[datum.key.toString()] = datum.value;
 			return res;
-		}, {});
+		}, {} as Record<string, DatumValue>);
 	}
 
 	public async keys(): Promise<string[]> {
@@ -67,76 +67,59 @@ export class Keep {
 		}
 	}
 
-	private writeFile(filePath: string, data: Datum): Promise<void> {
-		return new Promise((resolve, reject) => {
-			fs.writeFile(filePath, JSON.stringify(data), err => {
-				if (err) {
-					this.log(`Could not write file: ${err}`);
-					reject(err);
-				} else {
-					resolve();
-				}
-			});
-		});
+	private async writeFile(filePath: string, data: Datum): Promise<void> {
+		try {
+			await fs.writeFile(filePath, JSON.stringify(data));
+		} catch (err) {
+			this.throw(err);
+		}
 	}
 
-	private readFile(filePath: string): Promise<Datum | undefined> {
-		return new Promise((resolve, reject) => {
-			fs.readFile(filePath, (err, data) => {
-				if (err) {
-					if (err.code === 'ENOENT') {
-						this.log(`No data found for key: ${filePath}`);
-						resolve(undefined);
-					} else {
-						this.log(`Could not read file: ${err}`);
-						reject(err);
-					}
-				} else {
-					const content = JSON.parse(data.toString());
-					const datum = isDatum(content) ? content : undefined;
-					resolve(datum);
-				}
-			});
-		});
+	private async readFile(filePath: string): Promise<Datum | undefined> {
+		try {
+			const content = await fs.readFile(filePath);
+			const parsedContent = JSON.parse(content.toString());
+			const datum = isDatum(parsedContent) ? parsedContent : undefined;
+			return datum;
+		} catch (err) {
+			if (this.catch(err, 'ENOENT')) {
+				this.log(`No data found for key: ${filePath}`);
+				return undefined;
+			}
+			this.throw(err);
+		}
 	}
 
-	private removeFile(filePath: string): Promise<void> {
-		return new Promise((resolve, reject) => {
-			fs.unlink(filePath, err => {
-				if (err) {
-					this.log(`Could not remove file: ${err}`);
-					reject(err);
-				} else {
-					resolve();
-				}
-			});
-		});
+	private async removeFile(filePath: string): Promise<void> {
+		try {
+			await fs.unlink(filePath);
+		} catch (err) {
+			this.throw(err);
+		}
 	}
 
-	public readDir(): Promise<Datum[] | undefined> {
-		return new Promise((resolve, reject) => {
-			fs.readdir(this.storageDir, (err, files) => {
-				if (err) {
-					if (err.code === 'ENOENT') {
-						this.log(`No directory found: ${this.storageDir}`);
-						resolve(undefined);
-					} else {
-						this.log(`Could not read directory: ${err}`);
-						reject(err);
-					}
-				} else {
-					const datums: Datum[] = [];
-					for (const file of files) {
-						this.readFile(file).then(datum => {
-							if (datum) {
-								datums.push(datum);
-							}
-						});
-					}
-					resolve(datums);
+	public async readDir(): Promise<Datum[]> {
+		try {
+			const files = await fs.readdir(this.storageDir);
+			const data: Datum[] = [];
+			for (const file of files) {
+				const datum = await this.readFile(
+					nodePath.join(this.storageDir, file)
+				);
+				if (datum) {
+					data.push(datum);
 				}
-			});
-		});
+			}
+			return data;
+		} catch (err) {
+			if (!this.catch(err, 'ENOENT')) {
+				this.log(`No data found for directory: ${this.storageDir}`);
+				await fs.mkdir(this.storageDir, { recursive: true });
+				return [];
+			}
+			this.throw(err);
+		}
+		return [];
 	}
 
 	private getDatumPath(key: DatumKey): string {
@@ -147,5 +130,32 @@ export class Keep {
 		if (this.config.log) {
 			this.config.log(...args);
 		}
+	}
+
+	/**
+	 * Logs and throws the error if the config allows it.
+	 * @param err Any error object
+	 */
+	private throw(err: any) {
+		const error = err instanceof Error ? err : new Error(err);
+		if (this.config.log) {
+			this.config.log(error);
+		}
+		if (this.config.throw) {
+			throw error;
+		}
+	}
+
+	/**
+	 * Returns true if the error has the given code.
+	 * @param err Any error object
+	 * @param code A code to match against the error
+	 * @returns true if the error matches the code
+	 */
+	private catch(err: any, code: string) {
+		if (!isError(err, Error)) {
+			return false;
+		}
+		return err.code === code;
 	}
 }

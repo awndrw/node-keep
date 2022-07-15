@@ -7,10 +7,18 @@ export type DatumValue = any;
 export const createDefaultConfig = (subdir = 'storage'): Config => ({
 	dir: `.keep/${subdir}`,
 	log: console.log,
+	throw: false,
 });
 
 export const isDatum = (value: any): value is Datum =>
 	value && value.key && value.value;
+
+export function isError<T extends new (...args: any) => Error>(
+	value: Error,
+	errorType: T
+): value is InstanceType<T> & NodeJS.ErrnoException {
+	return value instanceof errorType;
+}
 
 export const hash = (key: DatumKey) =>
 	crypto.createHash('sha256').update(key).digest('hex');
@@ -22,6 +30,12 @@ export interface Config {
 	 * @default ".keep/storage"
 	 */
 	dir: string;
+
+	/**
+	 * Whether or not to throw errors instead of logging them.
+	 * @default false
+	 */
+	throw: boolean;
 
 	/**
 	 * A function to log errors to (or false to disable).
