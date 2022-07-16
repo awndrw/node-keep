@@ -7,9 +7,12 @@
 		"email": "andrew@wiggin.dev",
 		"url": "https://wiggin.dev"
 	},
+	"main": "./dist/index.js",
+	"typings": "./dist/index.d.ts",
 	"scripts": {
 		"clean": "rimraf dist",
 		"build": "yarn clean && tsc",
+		"api": "yarn build && yarn dlx @microsoft/api-extractor run --local --verbose",
 		"lint": "eslint .",
 		"test": "jest",
 		"prepack": "yarn build",

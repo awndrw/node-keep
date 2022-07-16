@@ -119,6 +119,10 @@ export class Keep {
 		}
 	}
 
+	/**
+	 * Reads a file at a specified path and returns a datum object. Returns undefined if the file is not found.
+	 * @internal
+	 */
 	private async readFile(filePath: string): Promise<Datum | undefined> {
 		try {
 			const content = await fs.readFile(filePath);
@@ -134,6 +138,10 @@ export class Keep {
 		}
 	}
 
+	/**
+	 * Removes a file at a specified path.
+	 * @internal
+	 */
 	private async removeFile(filePath: string): Promise<void> {
 		try {
 			await fs.unlink(filePath);
@@ -142,7 +150,11 @@ export class Keep {
 		}
 	}
 
-	public async readDir(): Promise<Datum[]> {
+	/**
+	 * Reads a directory and returns an array of datum objects found.
+	 * @internal
+	 */
+	private async readDir(): Promise<Datum[]> {
 		try {
 			const files = await fs.readdir(this.storageDir);
 			const data: Datum[] = [];
@@ -166,12 +178,17 @@ export class Keep {
 		return [];
 	}
 
+	/**
+	 * Returns the path of the datum file by using the hashed key.
+	 * @internal
+	 */
 	private getDatumPath(key: DatumKey): string {
 		return nodePath.join(this.storageDir, hash(key));
 	}
 
 	/**
 	 * Logs the provided data if logging is enabled.
+	 * @internal
 	 */
 	private log(...args: any[]) {
 		if (this.config.log) {
