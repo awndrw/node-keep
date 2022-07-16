@@ -1,0 +1,22 @@
+#!/bin/bash
+
+OUTDIR="./dist"
+TMPDIR="$OUTDIR/tmp"
+
+echo "[build] Prebuild cleaning"
+rm -rf "$OUTDIR"
+
+echo "[build] Creating tmp directory"
+mkdir -p "$TMPDIR"
+
+echo "[build] Compiling typescript"
+yarn tsc --outDir "$TMPDIR"
+
+echo "[build] Bundling javascript"
+yarn dlx -p webpack-cli -p webpack webpack --entry "$TMPDIR/index.js" --output-path "$OUTDIR" --output-filename "index.js" --node-env "$NODE_ENV"
+
+echo "[build] Bundling types"
+yarn dlx @microsoft/api-extractor run --local
+
+echo "[build] Cleaning up"
+rm -rf "$TMPDIR"

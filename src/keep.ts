@@ -5,6 +5,9 @@ import { createDefaultConfig, isDatum, hash, isError } from './shared';
 
 const DEFAULT_CONFIG: Config = createDefaultConfig();
 
+/**
+ * @public
+ */
 export class Keep {
 	private readonly config: Config;
 	private readonly storageDir: string;
