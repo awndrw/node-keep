@@ -2,16 +2,19 @@ import crypto from 'crypto';
 
 /**
  * The key of a datum stored in Keep (not hashed).
+ * @internal
  */
 export type DatumKey = string;
 
 /**
  * The value type of a datum stored in Keep.
+ * @internal
  */
 export type DatumValue = any;
 
 /**
  * The data type stored in Keep.
+ * @internal
  */
 export interface Datum {
 	key: DatumKey;
@@ -20,6 +23,7 @@ export interface Datum {
 
 /**
  * Returns the default config for the Keep client.
+ * @internal
  */
 export const createDefaultConfig = (): Config => ({
 	dir: '.keep/storage',
@@ -28,12 +32,14 @@ export const createDefaultConfig = (): Config => ({
 
 /**
  * Returns true if the given value is a valid {@link Datum | datum}.
+ * @internal
  */
 export const isDatum = (datum: any): datum is Datum =>
 	datum && datum.key && datum.value;
 
 /**
  * Returns true if the given value is a valid {@link NodeJS.ErrnoException}.
+ * @internal
  */
 export function isError<T extends new (...args: any) => Error>(
 	value: Error,
@@ -43,6 +49,7 @@ export function isError<T extends new (...args: any) => Error>(
 }
 /**
  * Returns the hash of the given key used to store the datum in Keep.
+ * @internal
  */
 export const hash = (key: DatumKey) =>
 	crypto.createHash('sha256').update(key).digest('hex');

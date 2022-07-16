@@ -13,7 +13,8 @@ echo "[build] Compiling typescript"
 yarn tsc --outDir "$TMPDIR"
 
 echo "[build] Bundling javascript"
-yarn dlx -p webpack-cli -p webpack webpack --entry "$TMPDIR/index.js" --output-path "$OUTDIR" --output-filename "index.js" --node-env "$NODE_ENV"
+FILENAME="index.js"
+yarn dlx -p webpack-cli -p webpack webpack --entry "$TMPDIR/$FILENAME" --output-path "$OUTDIR" --output-filename "$FILENAME" --node-env "$NODE_ENV"
 
 echo "[build] Bundling types"
 yarn dlx @microsoft/api-extractor run --local
