@@ -43,6 +43,15 @@ export class Keep {
 	}
 
 	/**
+	 * Returns the number of key-value pairs in the storage directory.
+	 * @public
+	 */
+	public async length(): Promise<number> {
+		const keys = await this.keys();
+		return keys.length;
+	}
+
+	/**
 	 * Returns the keys of the data stored in the storage directory.
 	 * @public
 	 */
