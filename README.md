@@ -19,7 +19,9 @@ yarn add node-keep
 const keep = new Keep();
 // Node Keep must be initialized before it is used
 await keep.init();
-keep.
+
+//
+keep.setItem('keyOne', 'valueOne');
 ```
 
 # API

@@ -1,0 +1,59 @@
+name: CI
+
+on: [push]
+
+jobs:
+    install:
+        name: Setup Environment
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/setup
+
+    lint:
+        name: Lint
+        needs: [install]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/setup
+            - run: yarn eslint .
+
+    typecheck:
+        name: Typecheck
+        needs: [install]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/setup
+            - run: yarn tsc --noEmit
+
+    test:
+        name: Test
+        needs: [install]
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                node-version: [14.x, 16.x, 18.x]
+        steps:
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/setup
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - run: yarn jest
+
+    build:
+        name: Build
+        needs: [lint, typecheck, test]
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                node-version: [14.x, 16.x, 18.x]
+        steps:
+            - uses: actions/checkout@v3
+            - uses: ./.github/actions/setup
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - run: yarn build:prod

@@ -1,0 +1,33 @@
+name: Setup
+description: Setup repo
+inputs:
+    registry-url:
+        required: false
+        default: https://registry.npmjs.org
+        description: Registry URL
+    node-version:
+        required: false
+        default: 18.x
+        description: Node Version
+
+runs:
+    using: composite
+    steps:
+        - name: Setup NodeJS
+          uses: actions/setup-node@v3
+          with:
+              node-version: ${{ inputs.node-version }}
+              registry-url: ${{ inputs.registry-url }}
+              cache: yarn
+
+        - name: Enable Corepack and Check Node Version
+          run: corepack enable && yarn -v
+          shell: bash
+
+        - name: Install Dependencies
+          run: yarn install --immutable --immutable-cache
+          shell: bash
+
+        - name: Build
+          run: yarn build
+          shell: bash
