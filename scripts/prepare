@@ -1,0 +1,25 @@
+#!/bin/bash
+
+OUTDIR="./lib"
+TMPDIR="$OUTDIR/tmp"
+
+echo "[prepare] Cleaning"
+rm -rf "$OUTDIR"
+
+echo "[build] Creating tmp directory"
+mkdir -p "$TMPDIR"
+
+echo "[prepare] Linting"
+yarn eslint .
+
+echo "[prepare] Testing"
+yarn jest --coverage --coverageReporters="json-summary" --coverageDirectory "$TMPDIR"
+
+echo "[prepare] Creating badges"
+yarn dlx jest-coverage-badges input "$TMPDIR/coverage-summary.json" output "$OUTDIR/badges"
+
+echo "[prepare] Building"
+yarn build:prod
+
+echo "[build] Cleaning up"
+rm -rf "$TMPDIR"

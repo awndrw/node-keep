@@ -10,12 +10,10 @@
 	"main": "./dist/index.js",
 	"typings": "./dist/index.d.ts",
 	"scripts": {
-		"build": "NODE_ENV=development ./build",
-		"build:prod": "NODE_ENV=production ./build",
-		"lint": "eslint .",
-		"test": "jest",
+		"build": "NODE_ENV=development ./scripts/build",
+		"build:prod": "NODE_ENV=production ./scripts/build",
 		"prepack": "yarn build:prod",
-		"prepublish": "yarn lint && yarn test && yarn build:prod"
+		"prepublish": "./scripts/prepare"
 	},
 	"packageManager": "yarn@3.2.1",
 	"devDependencies": {
