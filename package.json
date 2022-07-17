@@ -1,14 +1,22 @@
 {
 	"name": "node-keep",
 	"version": "0.0.1",
-	"description": "",
+	"description": "Simple Local Storage for Node.js",
 	"author": {
 		"name": "Andrew Wiggin",
 		"email": "andrew@wiggin.dev",
 		"url": "https://wiggin.dev"
 	},
 	"main": "./dist/index.js",
-	"typings": "./dist/index.d.ts",
+	"types": "./dist/index.d.ts",
+	"homepage": "https://github.com/wiggin/node-keep",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/wiggindev/node-keep.git"
+	},
+	"bugs": {
+		"url": "https://github.com/wiggin/node-keep/issues"
+	},
 	"scripts": {
 		"build": "NODE_ENV=development ./scripts/build",
 		"build:prod": "NODE_ENV=production ./scripts/build",
